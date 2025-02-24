@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_G8D9KvkYQSwp@ep-patient-grass-a8il0mex-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
+}
+
+
+model room {
+  id  Int @id @default(autoincrement()) 
+  room String?
+  
+  slug String?
+  chats chat[]  
+
+}
+ 
+model chat {
+  id Int @id @default(autoincrement())
+  message String
+  roomId Int
+  room room @relation(fields: [roomId] , references: [id])
+}
