@@ -2,6 +2,9 @@
 import {getWebSocket} from '../components/ws'
 import { useRouter } from "next/navigation";
 import { useRef,useState, useEffect } from "react"
+import React from "react";
+import { SparklesCore } from "@/components/ui/sparkles"
+
 export default  function Joining(){
     const router = useRouter()
     const [socket, setsocket] = useState<WebSocket| null>(null);

@@ -1,27 +1,15 @@
-"use client"
-import { WebSocket } from "ws";
-import { useRouter } from "next/navigation";
-import { useState , useEffect} from "react";
+"use client";
+import React from "react";
+import { SparklesCore } from "@/components/ui/sparkles"
 import { SplashCursor } from "@/components/ui/splash-cursor"
 
-import { SparklesCore } from "@/components/ui/sparkles"
-
-
-
-export default function Home() {
-  const router = useRouter()
-    function navi(){ 
-    router.push("/join")
-  }
-
-
-  
+export function SparklesPreview() {
   return (
    
-    <div className="h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
+    <div className="h-[40rem] w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
          <SplashCursor />
-      <h1 className="md:text-5xl text-2xl lg:text-6xl font-bold text-center text-white relative z-20">
-        <div onClick={()=>navi()}>Join Room</div>
+      <h1 className="md:text-7xl text-3xl lg:text-9xl font-bold text-center text-white relative z-20">
+        Acme
       </h1>
       <div className="w-[40rem] h-40 relative">
         {/* Gradients */}
@@ -46,4 +34,3 @@ export default function Home() {
     </div>
   );
 }
-
