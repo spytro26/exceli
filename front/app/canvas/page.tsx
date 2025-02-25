@@ -93,10 +93,10 @@ function Topbar({
           }}
         />
         <IconButton
-          activated={selectedTool === "eraser"}
+          activated={selectedTool === "erase"}
           icon={<EraserIcon />}
           onClick={() => {
-            setSelectedTool("eraser");
+            setSelectedTool("erase");
           }}
         />
       </div>

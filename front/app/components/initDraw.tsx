@@ -2,7 +2,7 @@
 import axios from "axios";
 import { getWebSocket } from "./ws";
 
-// Update Shape type to include "text"
+
 type Shape = {
   id: string,
   type: "rectangle";
@@ -29,6 +29,12 @@ type Shape = {
   x: number,
   y: number,
   text: string,
+
+} | {
+  shapeId : string
+  type : "erase"
+  shape? : string 
+
 }
 
 export async function initDraw(canvas: HTMLCanvasElement) {
@@ -63,6 +69,7 @@ export async function initDraw(canvas: HTMLCanvasElement) {
       clearCanvas(existingShapes, canvas, ctx);
     } else if (message.type === "erase") {
       // Remove the shape with the matching ID:
+      //@ts-ignore
       existingShapes = existingShapes.filter(s => s.id !== message.shapeId);
       clearCanvas(existingShapes, canvas, ctx);
     }
@@ -86,15 +93,22 @@ export async function initDraw(canvas: HTMLCanvasElement) {
     //@ts-ignore
     const selectedTool = window.SelectedTool;
     let shape: Shape | null = null;
-    if (selectedTool === "text") {
+
+    if(selectedTool==='erase'){
+     // ctx.clearRect(startX , startY , width , height);
+     
+
+
+    }
+    else   if (selectedTool === "text") {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       // Call text input overlay function
-      createTextInput(x, y, canvas, socket, roomId);
+      createTextInput(x, y, canvas, socket, roomId,existingShapes);
       return;
     }
-    if (selectedTool === 'rectangle') {
+    else if (selectedTool === 'rectangle') {
       shape = {
         id: Date.now().toString(),
         type: "rectangle",
@@ -143,8 +157,17 @@ export async function initDraw(canvas: HTMLCanvasElement) {
       const width = e.clientX - startX;
       const height = e.clientY - startY;
       clearCanvas(existingShapes, canvas, ctx);
+
       ctx.strokeStyle = "rgba(255, 255, 255)";
-      if (selectedTool === 'rectangle') {
+
+      if (selectedTool === 'erase') {
+        ctx.strokeStyle = "red";  // Set border color to red
+        ctx.lineWidth = 5;  // Adjust thickness if needed
+        ctx.strokeRect(startX, startY, width, height);  // Draw the rectangle outline
+      }
+      
+     
+     else  if (selectedTool === 'rectangle') {
         ctx.strokeRect(startX, startY, width, height);
       } else if (selectedTool === 'circle') {
         const radius = Math.abs(Math.max(width, height) / 2);
@@ -208,7 +231,8 @@ function createTextInput(
   y: number,
   canvas: HTMLCanvasElement,
   socket: WebSocket,
-  roomId: string
+  roomId: string,
+  existingShapes : any,
 ) {
   const input = document.createElement("input");
   input.type = "text";
@@ -260,6 +284,7 @@ input.addEventListener("blur", onBlur);
         y,
         text,
       };
+      existingShapes.push(textShape);
       socket.send(
         JSON.stringify({
           type: "chat",
