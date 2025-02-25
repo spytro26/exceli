@@ -22,7 +22,7 @@ type Shape = {
   starty: number, 
   endx: number, 
   endy: number
-}
+} 
 
 export async function initDraw(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d");
@@ -31,6 +31,14 @@ export async function initDraw(canvas: HTMLCanvasElement) {
     return  ;
   }
   const socket = getWebSocket();
+  socket.onopen = () => {
+    socket.send(
+      JSON.stringify({
+        type: "join",
+        roomId: roomId,
+      })
+    );
+  };
 
   let existingShapes : Shape[] = await getExistingShapes();
 
