@@ -54,8 +54,56 @@ ws.on("connection", (socket: WebSocket) => {
                     }
                 }
             }
+            else if (message.type === 'erase') {
+                // Find the room for the current socket
+                let room: string | undefined;
+                for (let user of socketArr) {
+                    if (user.socket === socket) {
+                        room = user.roomId;
+                        break;
+                    }
+                }
+                if (!room) {
+                    socket.send("You are not part of any room");
+                    console.log("Room not found for the user");
+                    return;
+                }
 
-            if (message.type === 'chat') {  
+                console.log(`Broadcasting erase event to room: ${room}`);
+                // Broadcast the erase event to other clients in the same room
+                for (let user of socketArr) {
+                    if (user.roomId === room && user.socket !== socket) {
+                        user.socket.send(
+                            JSON.stringify({
+                                type: "erase",
+                                shapeId: message.shapeId
+                            })
+                        );
+                    }
+                }
+
+                const roomRecord = await prisma.room.findFirst({
+                    where: { room }
+                });
+
+                if (roomRecord) {
+                    // Assuming that the chat table stores the shape as a JSON string,
+                    // we use a string filter to find the record with the matching shape id.
+                    const deleted = await prisma.chat.deleteMany({
+                        where: {
+                            roomId: roomRecord.id,
+                            message: {
+                                contains: `"id":"${message.shapeId}"`
+                            }
+                        }
+                    });
+                    console.log("Deleted shape from database", deleted);
+                }
+            
+            }
+
+
+           else if (message.type === 'chat') {  
                 let room: string | undefined; 
                 
                 for (let user of socketArr) {

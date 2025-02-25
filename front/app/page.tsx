@@ -2,6 +2,7 @@
 import { WebSocket } from "ws";
 import { useRouter } from "next/navigation";
 import { useState , useEffect} from "react";
+import { SplashCursor } from "@/components/ui/splash-cursor"
 
 
 
@@ -14,8 +15,6 @@ export default function Home() {
   
     router.push("/join")
 
-  
-
 
 
    
@@ -23,7 +22,8 @@ export default function Home() {
   }
 
 
-  return (<div>
+  return (<div className="w-screen h-screen bg-black">
+     <SplashCursor />
    beuitify this page then route it to the joining
    <br />
       <button onClick={

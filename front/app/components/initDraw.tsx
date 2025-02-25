@@ -67,6 +67,19 @@ export async function initDraw(canvas: HTMLCanvasElement) {
       const parsedShape = JSON.parse(message.message);
       existingShapes.push(parsedShape);
       clearCanvas(existingShapes, canvas, ctx);
+   //
+  //  shapesToErase.forEach(shape => {
+  //   socket.send(JSON.stringify({
+  //     type: "erase",
+  //     //@ts-ignore
+  //     shapeId: shape.id,
+  //     //roomId,
+  //   }));
+  // });
+
+   //
+
+
     } else if (message.type === "erase") {
       // Remove the shape with the matching ID:
       //@ts-ignore
@@ -94,11 +107,32 @@ export async function initDraw(canvas: HTMLCanvasElement) {
     const selectedTool = window.SelectedTool;
     let shape: Shape | null = null;
 
-    if(selectedTool==='erase'){
-     // ctx.clearRect(startX , startY , width , height);
-     
+    if (selectedTool === 'erase') {
+      // Normalize the eraser rectangle coordinates
+      const eraserRect = {
+        left: Math.min(startX, startX + width),
+        right: Math.max(startX, startX + width),
+        top: Math.min(startY, startY + height),
+        bottom: Math.max(startY, startY + height)
+      };
 
+      // Get all shapes that intersect with the eraser rectangle
+      const shapesToErase = existingShapes.filter(shape => inrect(shape, eraserRect));
 
+      // Send an erase message for each intersecting shape
+      shapesToErase.forEach(shape => {
+        socket.send(JSON.stringify({
+          type: "erase",
+          //@ts-ignore
+          shapeId: shape.id,
+          //roomId,
+        }));
+      });
+
+      // Remove the erased shapes from the local list
+      existingShapes = existingShapes.filter(shape => !inrect(shape, eraserRect));
+      clearCanvas(existingShapes, canvas, ctx);
+      return;
     }
     else   if (selectedTool === "text") {
       const rect = canvas.getBoundingClientRect();
@@ -295,4 +329,60 @@ input.addEventListener("blur", onBlur);
     }
   });
  
+}
+
+
+function inrect(shape: Shape, eraserRect: { left: number, top: number, right: number, bottom: number }): boolean {
+  switch (shape.type) {
+    case "rectangle": {
+      const shapeLeft = shape.x;
+      const shapeRight = shape.x + shape.width;
+      const shapeTop = shape.y;
+      const shapeBottom = shape.y + shape.height;
+      // Check if rectangles do NOT intersect, then invert the result.
+      return !(shapeRight < eraserRect.left || shapeLeft > eraserRect.right || shapeBottom < eraserRect.top || shapeTop > eraserRect.bottom);
+    }
+    case "circle": {
+      // Find the closest point on the eraser rectangle to the circle's center.
+      const closestX = Math.max(eraserRect.left, Math.min(shape.centerX, eraserRect.right));
+      const closestY = Math.max(eraserRect.top, Math.min(shape.centerY, eraserRect.bottom));
+      const dx = shape.centerX - closestX;
+      const dy = shape.centerY - closestY;
+      return (dx * dx + dy * dy) <= (shape.radius * shape.radius);
+    }
+    case "line": {
+      // Check if either endpoint is inside the eraser rectangle.
+      if (
+        shape.startx >= eraserRect.left && shape.startx <= eraserRect.right &&
+        shape.starty >= eraserRect.top && shape.starty <= eraserRect.bottom
+      ) return true;
+      if (
+        shape.endx >= eraserRect.left && shape.endx <= eraserRect.right &&
+        shape.endy >= eraserRect.top && shape.endy <= eraserRect.bottom
+      ) return true;
+
+      // Helper function to check line segment intersection.
+      function lineIntersects(x1: number, y1: number, x2: number, y2: number,
+                              x3: number, y3: number, x4: number, y4: number): boolean {
+        const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+        if (denom === 0) return false; // Parallel lines.
+        const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+        const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+        return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+      }
+      // Check intersection with each edge of the eraser rectangle.
+      if (lineIntersects(shape.startx, shape.starty, shape.endx, shape.endy, eraserRect.left, eraserRect.top, eraserRect.right, eraserRect.top)) return true;
+      if (lineIntersects(shape.startx, shape.starty, shape.endx, shape.endy, eraserRect.left, eraserRect.bottom, eraserRect.right, eraserRect.bottom)) return true;
+      if (lineIntersects(shape.startx, shape.starty, shape.endx, shape.endy, eraserRect.left, eraserRect.top, eraserRect.left, eraserRect.bottom)) return true;
+      if (lineIntersects(shape.startx, shape.starty, shape.endx, shape.endy, eraserRect.right, eraserRect.top, eraserRect.right, eraserRect.bottom)) return true;
+      return false;
+    }
+    case "text": {
+      // For text, we treat the (x, y) position as a point.
+      return shape.x >= eraserRect.left && shape.x <= eraserRect.right &&
+             shape.y >= eraserRect.top && shape.y <= eraserRect.bottom;
+    }
+    default:
+      return false;
+  }
 }
