@@ -21,7 +21,7 @@ export default function Canvas() {
   const [data, setData] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [selectedTool, setSelectedTool] = useState("circle");
+  const [selectedTool, setSelectedTool] = useState("line");
 
   // Set canvas height after component mounts
   useEffect(() => {

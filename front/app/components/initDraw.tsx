@@ -196,7 +196,7 @@ export async function initDraw(canvas: HTMLCanvasElement) {
 
       if (selectedTool === 'erase') {
         ctx.strokeStyle = "red";  // Set border color to red
-        ctx.lineWidth = 5;  // Adjust thickness if needed
+        ctx.lineWidth = 2;  // Adjust thickness if needed
         ctx.strokeRect(startX, startY, width, height);  // Draw the rectangle outline
       }
       

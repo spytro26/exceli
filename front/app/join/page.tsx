@@ -3,6 +3,7 @@ import {getWebSocket} from '../components/ws'
 import { useRouter } from "next/navigation";
 import { useRef,useState, useEffect } from "react"
 import React from "react";
+import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 
 
 export default  function Joining(){
@@ -56,6 +57,13 @@ export default  function Joining(){
 
         } 
     }
+   function   handleKeyPress(event : any){
+        if(event.key==='Enter'){
+        lungs();
+
+             }
+
+    }
 
     const inputbutton  = useRef<HTMLInputElement>(null)
     if(loading){
@@ -67,22 +75,34 @@ export default  function Joining(){
            
         </div>
     }
+    
 
-    return <div className=" h-screen min-w-full  text-lg font-red  text-yellow-500 flex justify-center items-center bg-green-300">
-        <div className="  ">
-        <h1>enter the room number</h1>
-     <input  ref={inputbutton} type="text" >
-     </input>
-     <br />
-     <button onClick={()=>{lungs()}} className="text-blue-700">
-        submit
-     </button>
-
-
- 
-        </div>
-      
-
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <HeroGeometric 
+            badge="Sketch Sync"
+            title1="Draw Collaborate"
+            title2="Ideate Create"
+          />
+         <div className="absolute top-[470px] flex flex-col items-center space-y-3">
+      <input
+       
+       onKeyDown={handleKeyPress}
+        type="text" 
+        ref={inputbutton}
+        placeholder="Enter Room Number"
+        className="w-[250px] px-4 py-2 text-lg rounded-lg border border-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+      />
+      <button 
+        onClick={() => lungs()} 
+        className="w-[250px] px-4 py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200"
+      >
+        Join Room
+      </button>
     </div>
+    
+         
+        </div>
+      );
    
 }

@@ -19,7 +19,7 @@ export default function Home() {
   return (
    
     <div className="h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
-         {/* <SplashCursor /> */}
+          <SplashCursor /> 
       <h1 className="md:text-5xl text-2xl lg:text-6xl font-bold text-center text-white relative z-20">
         <div onClick={()=>navi()}>Join Room</div>
       </h1>
